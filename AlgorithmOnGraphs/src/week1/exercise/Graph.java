@@ -5,8 +5,8 @@ import java.util.Iterator;
 import java.util.List;
 
 public class Graph {
-	private int  n = -1;
-    private List<Integer>[] adj;
+	int  n = -1;
+    List<Integer>[] adj;
 	
     public Graph(int n) {
     	this.n = n;

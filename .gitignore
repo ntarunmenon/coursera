@@ -1,6 +1,8 @@
 # Windows image file caches
 Thumbs.db
 ehthumbs.db
+# Added by Arun
+.class
 
 # Folder config file
 Desktop.ini
