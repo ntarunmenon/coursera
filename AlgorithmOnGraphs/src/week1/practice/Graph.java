@@ -1,13 +1,12 @@
-package week1.exercise;
+package week1.practice;
 
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
 public class Graph {
-	int  n = -1;
-    List<Integer>[] adj;
-	
+	public int  n = -1;
+	public List<Integer>[] adj;
     public Graph(int n) {
     	this.n = n;
     	adj = new List[n];

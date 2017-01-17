@@ -1,4 +1,4 @@
-package week1.exercise;
+package week1.practice;
 
 public class DFS {
 
