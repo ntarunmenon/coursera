@@ -1,0 +1,18 @@
+1. Brute Force Approach to patter Matching
+	- Run Time is O(|Text|*|Pattern|)
+	- For multiple patterns it will be O(Sum [|Text|*|Pattern|])
+	
+2. Trie Construction
+	-- Construct a Trie from all the patterns.
+	-- Run Time is O(|Text|*|LongestPattern|)
+	-- Memory Footprint - O(|Patterns|)
+	
+3. Text into Suffix Trees
+	-- The original text is converted to a suffic tree.
+	--  Runtime is O(Text+Patterns)
+	--  Memory Footprint - O(|Text|*|Text|)
+	
+4. Suffix Trees Compressiom
+	-- Compress the space usage by storing only index and length instear of the actual suffixes.
+	--  Runtime is O(Text+Patterns)
+	--  Memory Footprint - O(|Text|)
