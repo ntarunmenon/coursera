@@ -55,25 +55,30 @@ public class TrieMatching implements Runnable {
 	List <Integer> solve (String text, int n, List <String> patterns) {
 		List <Integer> result = new ArrayList <Integer> ();
 		// write your code here
-		List<Map<Character, Integer>> trie = buildTrie((String[])patterns.toArray());
+		List<Map<Character, Integer>> trie = buildTrie(patterns.toArray(new String[0]));
 		 for(int index = 0; index < text.length(); index++){
-			 Character currentChar = text.charAt(index);
 			 boolean foundPattern = false;
-			 int initialIndex = 0;
+			 int trieIndex = 0;
+			 int textIndex = index;
 			 while(true){
-				 if(trie.get(initialIndex).size() == 0){
-					 
-				 }
-				 Map<Character, Integer> map = trie.get(initialIndex);
+				 Character currentChar = text.charAt(textIndex);
+				 Map<Character, Integer> map = trie.get(trieIndex);
 				 if(map.containsKey(currentChar)){
-					 initialIndex = map.get(currentChar);
-				 }else{
-					 if(map.size() == 0){
-						 foundPattern = true;
+					 trieIndex = map.get(currentChar);
+					 if(textIndex == text.length()-1){
+						 break;
+					 }else{
+						 textIndex++;
 					 }
+				 }else if(map.size() == 0){
+					 foundPattern = true;
+					 break;
+				 }else{
+					 foundPattern = false;
 					 break;
 				 }
 			 }
+			 
 			 if(foundPattern){
 				 result.add(index);
 			 }
