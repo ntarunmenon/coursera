@@ -3,18 +3,6 @@ package test;
 import java.io.*;
 import java.util.*;
 
-class Node
-{
-	public static final int Letters =  4;
-	public static final int NA      = -1;
-	public int next [];
-
-	Node ()
-	{
-		next = new int [Letters];
-		Arrays.fill (next, NA);
-	}
-}
 
 public class TrieMatching implements Runnable {
 	int letterToIndex (char letter)
@@ -66,6 +54,9 @@ public class TrieMatching implements Runnable {
 				 if(map.containsKey(currentChar)){
 					 trieIndex = map.get(currentChar);
 					 if(textIndex == text.length()-1){
+						 if(trie.get(trieIndex).size() == 0){
+							 foundPattern = true;
+						 }
 						 break;
 					 }else{
 						 textIndex++;
