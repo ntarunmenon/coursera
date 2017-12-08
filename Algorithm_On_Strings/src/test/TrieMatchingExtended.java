@@ -59,6 +59,9 @@ public class TrieMatchingExtended implements Runnable {
 				 if( nextTrieIndex != -1){// Pattern is Matching. 
 					 trieIndex = nextTrieIndex;
 					 //Check if trie is leaf.
+					if(trie.get(trieIndex).patternEnd && !trie.get(trieIndex).isLeaf() && !result.contains(textIndex)){
+						result.add(textIndex);
+					}
 					 if(trie.get(trieIndex).isLeaf()){
 						 foundPattern = true;
 						 break;
@@ -77,7 +80,7 @@ public class TrieMatchingExtended implements Runnable {
 				 }
 			 }
 			 
-			 if(foundPattern){
+			 if(foundPattern && !result.contains(index)){
 				 result.add(index);
 			 }
 		 }

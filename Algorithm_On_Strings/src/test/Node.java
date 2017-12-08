@@ -18,7 +18,7 @@ public class Node
 	
 	@Override
 	public String toString() {
-		return Arrays.toString(next);
+		return Arrays.toString(next) + "  " + patternEnd;
 	}
 
 	public boolean isLeaf() {
