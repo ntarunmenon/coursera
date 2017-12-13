@@ -6,8 +6,11 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Queue;
+import java.util.Set;
 import java.util.StringTokenizer;
 
 class WeightedGraph {
@@ -24,9 +27,9 @@ class WeightedGraph {
     }
     
     public void removeEdge(SuffixNode start, SuffixNode end) {
-    	 Iterator<SuffixNode> it = adj.get(start.label).iterator();
+    	 Iterator<SuffixNode> it = adj.get(start.startIndex).iterator();
     	 while (it.hasNext()) {
-    		 if (it.next().label == end.label) {
+    		 if (it.next().startIndex == end.startIndex) {
     			  it.remove();
                   return;
     		 }
@@ -42,26 +45,38 @@ class WeightedGraph {
 
  
 class SuffixNode {
-	public int label;
-	public String path;
+	public int startIndex;
+	public int endIndex;
+	public String edgeLabel;
+	public boolean visited;
 	
-	
-	public SuffixNode(int labe, String path) {
+	public SuffixNode(int startNode, int endNode, String path) {
 		super();
-		this.label = label;
-		this.path = path;
+		this.startIndex = startNode;
+		this.endIndex = endNode;
+		this.edgeLabel = path;
+		visited = false;
+		
 	}
+
+	
+
+	public boolean equals(Object arg0) {
+		return startIndex == ((SuffixNode)arg0).startIndex;
+	}
+
 
 
 	@Override
 	public String toString() {
-		return "Node [label=" + label + ", path=" + path + "]";
+		return "Node [startIndex=" + startIndex + ", endIndex=" + endIndex + ", path=" + edgeLabel + "]";
 	}
 	
 }
 
 
 public class SuffixTree {
+	
     class FastScanner {
         StringTokenizer tok = new StringTokenizer("");
         BufferedReader in;
@@ -88,17 +103,80 @@ public class SuffixTree {
         List<String> result = new ArrayList<String>();
         WeightedGraph graph = new WeightedGraph();
         int egdeLabel = 0;
-        for(int index = text.length() - 1; index >= 0; index--){
-        	graph.addEdge(egdeLabel, new SuffixNode(++egdeLabel, text.substring(index, text.length())));
-        }
+        egdeLabel++;
+        SuffixNode node = new SuffixNode(egdeLabel -1 ,egdeLabel, text.charAt(text.length() - 1)+"");
+        graph.addEdge(0, node);
         
-        for(Map.Entry<Integer, List<SuffixNode>> entry:graph.adj.entrySet()){
-			List<SuffixNode> nodes =  entry.getValue();
-			for(SuffixNode node: nodes){
-				result.add(node.path);
-			}
-			
-		}
+        for(int index = text.length() - 1; index >= 0; index--){
+        	String currentSuffixString = text.substring(index,text.length());
+	        int mapIndex = 0;
+	        int listIndex = 0;
+	        while(true){
+	        	SuffixNode currentNode= graph.adj.get(mapIndex).get(listIndex);
+	            if(currentSuffixString.equals("$")){
+	            	break;
+		        }
+	            
+	        	/*
+	        	 * Is the first character of the currentNode equal to the first character of the currentSuffixString
+	        	 *  if Yes
+	        	 */
+	            List<SuffixNode> adjList = graph.adj.get(currentNode.startIndex);
+	            if(adjList != null){
+		        	for(int nodeIndex = 0;nodeIndex < adjList.size(); nodeIndex ++){
+			        	SuffixNode iterNode = adjList.get(nodeIndex);
+						if(currentSuffixString.charAt(0) == iterNode.edgeLabel.charAt(0)){
+			        		
+			        		/**
+			        		 * The assumption is that if the current label is a string of length one then there is no need for a split then we have to naivgate.
+			        		 * 
+			        		 * If the first character matches and then length of the label is greater than 1 then split.
+			        		 *  -- For splitting do the following things.
+			        		 *  	-- Substring the label taking the first character out.
+			        		 *  	-- The first character will be the new node.
+			        		 *  	-- The substring will be the one node.
+			        		 *  	-- The character after removing the first node will be the second child.
+			        		 * else navigate
+			        		 */
+			        		
+			        		System.out.println("Found a Match with character" + iterNode.edgeLabel.charAt(0));
+			        		if(iterNode.edgeLabel.length() > 1){
+			        			String leftNode = iterNode.edgeLabel.substring(1, iterNode.edgeLabel.length());
+			        			egdeLabel++;
+			        			graph.addEdge(iterNode.endIndex, new SuffixNode(iterNode.endIndex, egdeLabel, leftNode));
+			        			String rightNode = currentSuffixString.substring(1, currentSuffixString.length());
+			        			egdeLabel++;
+			        			graph.addEdge(iterNode.endIndex, new SuffixNode(iterNode.endIndex, egdeLabel, rightNode));
+			        			iterNode.edgeLabel=iterNode.edgeLabel.charAt(0)+"";
+			        		}else{
+			        			mapIndex = iterNode.endIndex;
+			        			listIndex = nodeIndex;
+			        		}
+			        		break;
+			        	}else{	
+			        		egdeLabel++;
+			        		SuffixNode newNode=new SuffixNode(currentNode.startIndex, egdeLabel, currentSuffixString);
+			        		graph.addEdge(currentNode.startIndex, newNode);
+			        		break;
+			        	}
+		        	}
+	            }else{
+	            	egdeLabel++;
+	        		SuffixNode newNode=new SuffixNode(currentNode.startIndex, egdeLabel, currentSuffixString);
+	        		graph.addEdge(currentNode.startIndex, newNode);
+	        		break;
+	            }
+        	break;
+	        }
+	    }
+        
+        for( Map.Entry<Integer,List<SuffixNode>> entry :  graph.adj.entrySet()){
+        	if( entry.getValue() != null &&  entry.getValue().size() > 0){
+	        	for(SuffixNode suffixNode: entry.getValue()){
+	        			result.add(suffixNode.edgeLabel);
+	        	}
+        	}
+        }
         return result;
     }
 
