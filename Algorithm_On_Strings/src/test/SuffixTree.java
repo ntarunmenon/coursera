@@ -26,15 +26,6 @@ class WeightedGraph {
     	adj.put(startNode, nodes);
     }
     
-    public void removeEdge(SuffixNode start, SuffixNode end) {
-    	 Iterator<SuffixNode> it = adj.get(start.startIndex).iterator();
-    	 while (it.hasNext()) {
-    		 if (it.next().startIndex == end.startIndex) {
-    			  it.remove();
-                  return;
-    		 }
-    	 }
-    }
     
     public boolean hasEdge(int i, int j) {
         return adj.get(i).contains(j);
@@ -45,33 +36,21 @@ class WeightedGraph {
 
  
 class SuffixNode {
-	public int startIndex;
 	public int endIndex;
 	public String edgeLabel;
 	public boolean visited;
 	
-	public SuffixNode(int startNode, int endNode, String path) {
+	public SuffixNode(int endNode, String path) {
 		super();
-		this.startIndex = startNode;
 		this.endIndex = endNode;
 		this.edgeLabel = path;
 		visited = false;
-		
 	}
-
 	
-
-	public boolean equals(Object arg0) {
-		return startIndex == ((SuffixNode)arg0).startIndex;
-	}
-
-
-
 	@Override
 	public String toString() {
-		return "Node [startIndex=" + startIndex + ", endIndex=" + endIndex + ", path=" + edgeLabel + "]";
+		return "endIndex " + endIndex + "   edgeLabel " +  edgeLabel;
 	}
-	
 }
 
 
@@ -102,17 +81,24 @@ public class SuffixTree {
     public List<String> computeSuffixTreeEdges(String text) {
         List<String> result = new ArrayList<String>();
         WeightedGraph graph = new WeightedGraph();
-        int egdeLabel = 0;
-        egdeLabel++;
-        SuffixNode node = new SuffixNode(egdeLabel -1 ,egdeLabel, text.charAt(text.length() - 1)+"");
+        int edgeIndex = 0;
+        edgeIndex++;
+        SuffixNode node = new SuffixNode(edgeIndex, text.charAt(text.length() - 1)+"");
         graph.addEdge(0, node);
         
         for(int index = text.length() - 1; index >= 0; index--){
         	String currentSuffixString = text.substring(index,text.length());
 	        int mapIndex = 0;
-	        int listIndex = 0;
-	        while(true){
-	        	SuffixNode currentNode= graph.adj.get(mapIndex).get(listIndex);
+	        
+	        /**
+	        * This while does the following.
+	        * 
+	        *  1. For Each Suffix
+	        *  	a. navigare the tree. If there is a match then either split or navigate the tree.
+	        *   b. If there is no match then insert entry into the tree,
+	        */
+	      boolean stopCurrentSuffixIteration = false;
+	        while(!stopCurrentSuffixIteration){
 	            if(currentSuffixString.equals("$")){
 	            	break;
 		        }
@@ -121,59 +107,63 @@ public class SuffixTree {
 	        	 * Is the first character of the currentNode equal to the first character of the currentSuffixString
 	        	 *  if Yes
 	        	 */
-	            List<SuffixNode> adjList = graph.adj.get(currentNode.startIndex);
+	            List<SuffixNode> adjList = graph.adj.get(mapIndex);
 	            if(adjList != null){
-		        	for(int nodeIndex = 0;nodeIndex < adjList.size(); nodeIndex ++){
-			        	SuffixNode iterNode = adjList.get(nodeIndex);
-						if(currentSuffixString.charAt(0) == iterNode.edgeLabel.charAt(0)){
-			        		
-			        		/**
-			        		 * The assumption is that if the current label is a string of length one then there is no need for a split then we have to naivgate.
-			        		 * 
-			        		 * If the first character matches and then length of the label is greater than 1 then split.
-			        		 *  -- For splitting do the following things.
-			        		 *  	-- Substring the label taking the first character out.
-			        		 *  	-- The first character will be the new node.
-			        		 *  	-- The substring will be the one node.
-			        		 *  	-- The character after removing the first node will be the second child.
-			        		 * else navigate
-			        		 */
-			        		
-			        		System.out.println("Found a Match with character" + iterNode.edgeLabel.charAt(0));
-			        		if(iterNode.edgeLabel.length() > 1){
-			        			String leftNode = iterNode.edgeLabel.substring(1, iterNode.edgeLabel.length());
-			        			egdeLabel++;
-			        			graph.addEdge(iterNode.endIndex, new SuffixNode(iterNode.endIndex, egdeLabel, leftNode));
-			        			String rightNode = currentSuffixString.substring(1, currentSuffixString.length());
-			        			egdeLabel++;
-			        			graph.addEdge(iterNode.endIndex, new SuffixNode(iterNode.endIndex, egdeLabel, rightNode));
-			        			iterNode.edgeLabel=iterNode.edgeLabel.charAt(0)+"";
-			        		}else{
+	            	boolean addNode=true;
+	            	for(int nodeIndex = 0;nodeIndex < adjList.size(); nodeIndex ++){
+		        		SuffixNode iterNode = adjList.get(nodeIndex);
+			        	String iterNodeEdgeLabel = iterNode.edgeLabel;
+						if(currentSuffixString.charAt(0) == iterNodeEdgeLabel.charAt(0)){
+							if(iterNodeEdgeLabel.length() == 1){
 			        			mapIndex = iterNode.endIndex;
-			        			listIndex = nodeIndex;
-			        		}
-			        		break;
-			        	}else{	
-			        		egdeLabel++;
-			        		SuffixNode newNode=new SuffixNode(currentNode.startIndex, egdeLabel, currentSuffixString);
-			        		graph.addEdge(currentNode.startIndex, newNode);
-			        		break;
+			        			currentSuffixString = currentSuffixString.substring(1, currentSuffixString.length());
+			        			addNode = false;
+				        		break;
+							}
+							int newIndex = iterNode.endIndex;
+							String newEdge = "";
+							while(iterNodeEdgeLabel.length() > 0){
+								if(currentSuffixString.charAt(0) == iterNodeEdgeLabel.charAt(0)){
+									newEdge = newEdge + currentSuffixString.charAt(0);
+									currentSuffixString = currentSuffixString.substring(1, currentSuffixString.length());
+									iterNodeEdgeLabel = iterNodeEdgeLabel.substring(1, iterNodeEdgeLabel.length());
+								}else{
+									break;
+								}
+							}
+							iterNode.edgeLabel=newEdge;
+		        			graph.addEdge(newIndex, new SuffixNode(edgeIndex, iterNodeEdgeLabel));
+		        			edgeIndex++;
+		        			graph.addEdge(newIndex, new SuffixNode(edgeIndex, currentSuffixString));
+		        			stopCurrentSuffixIteration = true;
+		        			addNode=false;
+		        			break;
+							// Found a character match
 			        	}
 		        	}
+	               	if(addNode){
+		        		edgeIndex++;
+		        		SuffixNode newNode=new SuffixNode(edgeIndex, currentSuffixString);
+		        		graph.addEdge(mapIndex, newNode);
+		        		stopCurrentSuffixIteration = true;
+		        	}
+	               	if(stopCurrentSuffixIteration){
+		        		break;
+		        	}
 	            }else{
-	            	egdeLabel++;
-	        		SuffixNode newNode=new SuffixNode(currentNode.startIndex, egdeLabel, currentSuffixString);
-	        		graph.addEdge(currentNode.startIndex, newNode);
+	            	edgeIndex++;
+	        		SuffixNode newNode=new SuffixNode(edgeIndex, currentSuffixString);
+	        		graph.addEdge(mapIndex, newNode);
 	        		break;
 	            }
-        	break;
 	        }
 	    }
         
         for( Map.Entry<Integer,List<SuffixNode>> entry :  graph.adj.entrySet()){
         	if( entry.getValue() != null &&  entry.getValue().size() > 0){
 	        	for(SuffixNode suffixNode: entry.getValue()){
-	        			result.add(suffixNode.edgeLabel);
+	        		if(suffixNode.edgeLabel != null && !suffixNode.edgeLabel.equals(""))	
+	        		result.add(suffixNode.edgeLabel);
 	        	}
         	}
         }
