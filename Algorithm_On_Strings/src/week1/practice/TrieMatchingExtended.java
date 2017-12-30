@@ -1,4 +1,4 @@
-package test;
+package week1.practice;
 
 import java.io.*;
 import java.util.*;

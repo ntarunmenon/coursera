@@ -1,4 +1,4 @@
-package test;
+package week1.practice;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -49,7 +49,7 @@ class SuffixNode {
 	
 	@Override
 	public String toString() {
-		return "endIndex " + endIndex + "   edgeLabel " +  edgeLabel;
+		return "endIndex=" + endIndex + "   edgeLabel=" +  edgeLabel;
 	}
 }
 
@@ -132,6 +132,7 @@ public class SuffixTree {
 								}
 							}
 							iterNode.edgeLabel=newEdge;
+							edgeIndex++;
 		        			graph.addEdge(newIndex, new SuffixNode(edgeIndex, iterNodeEdgeLabel));
 		        			edgeIndex++;
 		        			graph.addEdge(newIndex, new SuffixNode(edgeIndex, currentSuffixString));
